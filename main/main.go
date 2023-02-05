@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"log"
 	"net/http"
 )
 
@@ -16,8 +17,13 @@ func main() {
 		panic(err)
 	}
 
+	if err != nil {
+		log.Fatalf("failed to set up the validator: %v", err)
+	}
+
 	userRepository := user.NewRepository(db)
-	userHandler := user.CreateHandler(userRepository)
+	userService := user.NewService(userRepository)
+	userHandler := user.CreateHandler(userService)
 
 	r.Get("/", func(writer http.ResponseWriter, request *http.Request) {
 		writer.Write([]byte("Hello world"))

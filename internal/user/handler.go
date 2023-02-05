@@ -1,28 +1,33 @@
 package user
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/fahrurben/gopress/helper/controller"
 	"net/http"
 )
 
-type Handler struct {
-	userRepository Repository
+type Service interface {
+	Save(ctx context.Context, request CreateUserRequest) (*int64, error)
 }
 
-func CreateHandler(userRepository Repository) *Handler {
-	return &Handler{userRepository: userRepository}
+type Handler struct {
+	service Service
+}
+
+func CreateHandler(service Service) *Handler {
+	return &Handler{service: service}
 }
 
 func (h *Handler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
-	var user User
-	err := json.NewDecoder(r.Body).Decode(&user)
+	var createUserRequest CreateUserRequest
+	err := json.NewDecoder(r.Body).Decode(&createUserRequest)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	id, err := h.userRepository.Save(user)
+	id, err := h.service.Save(r.Context(), createUserRequest)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
