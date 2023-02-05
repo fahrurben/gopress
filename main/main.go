@@ -24,7 +24,7 @@ func main() {
 
 	r.Route("/api", func(r chi.Router) {
 		r.Route("/user", func(r chi.Router) {
-			r.Use(middleware.AdminOnly)
+			r.Use(middleware.JwtAuthMiddleware)
 			r.Post("/", userHandler.CreateUserHandler)
 		})
 	})

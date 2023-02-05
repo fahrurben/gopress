@@ -2,10 +2,8 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	jwtmiddleware "github.com/auth0/go-jwt-middleware/v2"
 	"github.com/auth0/go-jwt-middleware/v2/validator"
-	"github.com/fahrurben/gopress/internal/user"
 	"log"
 	"net/http"
 	"os"
@@ -23,7 +21,7 @@ func (u UserClaims) Validate(ctx context.Context) error {
 	return nil
 }
 
-func AdminOnly(next http.Handler) http.Handler {
+func JwtAuthMiddleware(next http.Handler) http.Handler {
 	keyFunc := func(ctx context.Context) (interface{}, error) {
 		// Our token must be signed using this data.
 		return []byte(os.Getenv("JWT_AUTH_SECRET")), nil
@@ -58,12 +56,11 @@ func AdminOnly(next http.Handler) http.Handler {
 
 		userClaims := claims.CustomClaims.(*UserClaims)
 
-		if role, _ := strconv.Atoi(userClaims.Type); role != user.TYPE_ADMIN {
-			fmt.Printf("%+v\n", claims.CustomClaims)
-			http.Error(w, http.StatusText(403), 403)
-			return
-		}
+		usertype, _ := strconv.Atoi(userClaims.Type)
+		ctx := context.WithValue(r.Context(), "auth_email", userClaims.Email)
+		ctx = context.WithValue(ctx, "auth_name", userClaims.Name)
+		ctx = context.WithValue(ctx, "auth_type", usertype)
 
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	}))
 }

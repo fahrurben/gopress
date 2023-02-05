@@ -2,6 +2,8 @@ package user
 
 import (
 	"context"
+	"errors"
+	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
@@ -22,17 +24,24 @@ func NewService(repository Repository) *ServiceImpl {
 }
 
 func (s *ServiceImpl) Save(ctx context.Context, request CreateUserRequest) (*int64, error) {
-	/*
-		authUser := ctx.Value("auth_user").(User)
+	userType := ctx.Value("auth_type").(int)
 
-		if authUser.Type != TYPE_ADMIN {
-			return nil, errors.New("this request not authorized")
-		}
-	*/
+	if userType != TYPE_ADMIN {
+		return nil, errors.New("this request not authorized")
+	}
+
+	password := []byte(request.Password)
+	// Hashing the password with the default cost of 10
+	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+
+	if err != nil {
+		return nil, err
+	}
+
 	user := User{
 		Name:      request.Name,
 		Email:     request.Email,
-		Password:  request.Password,
+		Password:  string(hashedPassword),
 		Type:      request.Type,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
