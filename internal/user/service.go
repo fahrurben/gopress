@@ -96,3 +96,13 @@ func (s ServiceImpl) FindAll(page int, pageSize int) ([]User, int, int, error) {
 
 	return users, totalCount, totalPage, err
 }
+
+func (s ServiceImpl) FindById(id int) (*User, error) {
+	user, err := s.repository.FindById(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, err
+}

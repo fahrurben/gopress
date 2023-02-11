@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/fahrurben/gopress/helper/controller"
 	"github.com/go-chi/chi/v5"
 	"net/http"
@@ -15,6 +14,7 @@ type Service interface {
 	Update(ctx context.Context, id int, request UpdateUserRequest) (bool, error)
 	Delete(ctx context.Context, id int) error
 	FindAll(int, int) ([]User, int, int, error)
+	FindById(id int) (*User, error)
 }
 
 type Handler struct {
@@ -89,8 +89,6 @@ func (h *Handler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) SelectUserHandler(w http.ResponseWriter, r *http.Request) {
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	limit, err := strconv.Atoi(chi.URLParam(r, "limit"))
-	fmt.Println(page, limit)
-
 	if err != nil {
 		controller.WriteErrorResponse(w, err.Error())
 		return
@@ -106,4 +104,27 @@ func (h *Handler) SelectUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Pagination-Total-Count", strconv.Itoa(totalCount))
 	w.Header().Set("Pagination-Total-Page", strconv.Itoa(totalPage))
 	controller.WriteSuccessResponse(w, users)
+}
+
+func (h *Handler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+
+	if err != nil {
+		controller.WriteErrorResponse(w, err.Error())
+		return
+	}
+
+	user, err := h.service.FindById(id)
+
+	if err != nil {
+		controller.WriteErrorResponse(w, err.Error())
+		return
+	}
+
+	if user == nil {
+		controller.WriteErrorResponse(w, "Entity Not Found")
+		return
+	}
+
+	controller.WriteSuccessResponse(w, user)
 }

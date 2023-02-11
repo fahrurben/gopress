@@ -27,6 +27,7 @@ func main() {
 			r.Use(middleware.JwtAuthMiddleware)
 			r.Get("/all/{page}/{limit}", userHandler.SelectUserHandler)
 			r.Post("/", userHandler.CreateUserHandler)
+			r.Get("/{id}", userHandler.GetUserHandler)
 			r.Patch("/{id}", userHandler.UpdateUserHandler)
 			r.Delete("/{id}", userHandler.DeleteUserHandler)
 		})
