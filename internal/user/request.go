@@ -7,4 +7,8 @@ type (
 		Password string `db:"password"`
 		Type     int    `db:"type" json:"type"`
 	}
+
+	UpdateUserRequest struct {
+		Name string `db:"name" json:"name"`
+	}
 )

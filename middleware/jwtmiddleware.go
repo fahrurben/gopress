@@ -12,9 +12,9 @@ import (
 )
 
 type UserClaims struct {
-	Email string `json:"email"`
-	Name  string `json:"name"`
-	Type  string `json:"type"`
+	Email string `json:"auth_email"`
+	Name  string `json:"auth_name"`
+	Type  string `json:"auth_type"`
 }
 
 func (u UserClaims) Validate(ctx context.Context) error {

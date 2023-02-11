@@ -51,3 +51,39 @@ func (s *ServiceImpl) Save(ctx context.Context, request CreateUserRequest) (*int
 
 	return id, err
 }
+
+func (s *ServiceImpl) Update(ctx context.Context, id int, request UpdateUserRequest) (bool, error) {
+	userType := ctx.Value("auth_type").(int)
+	if userType != TYPE_ADMIN {
+		return false, errors.New("this request not authorized")
+	}
+
+	user, err := s.repository.FindById(id)
+	if err != nil {
+		return false, err
+	}
+	user.Name = request.Name
+	_, err = s.repository.Update(*user)
+	if err != nil {
+		return false, err
+	}
+
+	return true, err
+}
+
+func (s ServiceImpl) Delete(ctx context.Context, id int) error {
+	userType := ctx.Value("auth_type").(int)
+	if userType != TYPE_ADMIN {
+		return errors.New("this request not authorized")
+	}
+
+	user, err := s.repository.FindById(id)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return errors.New("entity not found")
+	}
+
+	return s.repository.DeleteById(id)
+}

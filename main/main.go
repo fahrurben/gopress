@@ -26,6 +26,8 @@ func main() {
 		r.Route("/user", func(r chi.Router) {
 			r.Use(middleware.JwtAuthMiddleware)
 			r.Post("/", userHandler.CreateUserHandler)
+			r.Patch("/{id}", userHandler.UpdateUserHandler)
+			r.Delete("/{id}", userHandler.DeleteUserHandler)
 		})
 	})
 
