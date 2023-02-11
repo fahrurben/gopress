@@ -25,6 +25,7 @@ func main() {
 	r.Route("/api", func(r chi.Router) {
 		r.Route("/user", func(r chi.Router) {
 			r.Use(middleware.JwtAuthMiddleware)
+			r.Get("/all/{page}/{limit}", userHandler.SelectUserHandler)
 			r.Post("/", userHandler.CreateUserHandler)
 			r.Patch("/{id}", userHandler.UpdateUserHandler)
 			r.Delete("/{id}", userHandler.DeleteUserHandler)

@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/fahrurben/gopress/helper/controller"
 	"github.com/go-chi/chi/v5"
 	"net/http"
@@ -13,6 +14,7 @@ type Service interface {
 	Save(ctx context.Context, request CreateUserRequest) (*int64, error)
 	Update(ctx context.Context, id int, request UpdateUserRequest) (bool, error)
 	Delete(ctx context.Context, id int) error
+	FindAll(int, int) ([]User, int, int, error)
 }
 
 type Handler struct {
@@ -82,4 +84,26 @@ func (h *Handler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	controller.WriteSuccessResponse(w, id)
+}
+
+func (h *Handler) SelectUserHandler(w http.ResponseWriter, r *http.Request) {
+	page, err := strconv.Atoi(chi.URLParam(r, "page"))
+	limit, err := strconv.Atoi(chi.URLParam(r, "limit"))
+	fmt.Println(page, limit)
+
+	if err != nil {
+		controller.WriteErrorResponse(w, err.Error())
+		return
+	}
+
+	users, totalCount, totalPage, err := h.service.FindAll(page, limit)
+
+	if err != nil {
+		controller.WriteErrorResponse(w, err.Error())
+		return
+	}
+
+	w.Header().Set("Pagination-Total-Count", strconv.Itoa(totalCount))
+	w.Header().Set("Pagination-Total-Page", strconv.Itoa(totalPage))
+	controller.WriteSuccessResponse(w, users)
 }

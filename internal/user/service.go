@@ -11,7 +11,7 @@ type Repository interface {
 	Save(user User) (*int64, error)
 	Update(user User) (bool, error)
 	FindById(id int) (*User, error)
-	FindAll() []User
+	FindAll(int, int) ([]User, int, int, error)
 	DeleteById(id int) error
 }
 
@@ -86,4 +86,13 @@ func (s ServiceImpl) Delete(ctx context.Context, id int) error {
 	}
 
 	return s.repository.DeleteById(id)
+}
+
+func (s ServiceImpl) FindAll(page int, pageSize int) ([]User, int, int, error) {
+	users, totalCount, totalPage, err := s.repository.FindAll(page, pageSize)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+
+	return users, totalCount, totalPage, err
 }
