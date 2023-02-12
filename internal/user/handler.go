@@ -14,6 +14,7 @@ type Service interface {
 	Update(ctx context.Context, id int, request UpdateUserRequest) (bool, error)
 	Delete(ctx context.Context, id int) error
 	FindAll(int, int) ([]User, int, int, error)
+	FindAllPagination(int, int) ([]User, int, int, error)
 	FindById(id int) (*User, error)
 }
 
@@ -94,7 +95,7 @@ func (h *Handler) SelectUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	users, totalCount, totalPage, err := h.service.FindAll(page, limit)
+	users, totalCount, totalPage, err := h.service.FindAllPagination(page, limit)
 
 	if err != nil {
 		controller.WriteErrorResponse(w, err.Error())

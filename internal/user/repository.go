@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"github.com/fahrurben/gopress/internal/repository"
 	"github.com/jmoiron/sqlx"
 	"time"
 )
@@ -78,6 +79,10 @@ func (r *RepositoryImpl) FindAll(page int, pageSize int) ([]User, int, int, erro
 	}
 
 	return results, totalCount, totalPage, err
+}
+
+func (r *RepositoryImpl) FindAllPagination(page int, pageSize int) ([]User, int, int, error) {
+	return repository.FindAll[User](r.db, User{}, FindAllUser, nil, 1, 10)
 }
 
 func (r *RepositoryImpl) DeleteById(id int) error {

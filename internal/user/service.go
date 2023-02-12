@@ -12,6 +12,7 @@ type Repository interface {
 	Update(user User) (bool, error)
 	FindById(id int) (*User, error)
 	FindAll(int, int) ([]User, int, int, error)
+	FindAllPagination(int, int) ([]User, int, int, error)
 	DeleteById(id int) error
 }
 
@@ -90,6 +91,15 @@ func (s ServiceImpl) Delete(ctx context.Context, id int) error {
 
 func (s ServiceImpl) FindAll(page int, pageSize int) ([]User, int, int, error) {
 	users, totalCount, totalPage, err := s.repository.FindAll(page, pageSize)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+
+	return users, totalCount, totalPage, err
+}
+
+func (s ServiceImpl) FindAllPagination(page int, pageSize int) ([]User, int, int, error) {
+	users, totalCount, totalPage, err := s.repository.FindAllPagination(page, pageSize)
 	if err != nil {
 		return nil, 0, 0, err
 	}
