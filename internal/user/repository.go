@@ -2,14 +2,14 @@ package user
 
 import (
 	"context"
-	"fmt"
-	"github.com/fahrurben/gopress/internal/repository"
+	"github.com/fahrurben/gopress/internal/common"
 	"github.com/jmoiron/sqlx"
 	"time"
 )
 
 type RepositoryImpl struct {
 	db *sqlx.DB
+	common.BaseRepository
 }
 
 func NewRepository(db *sqlx.DB) *RepositoryImpl {
@@ -63,26 +63,8 @@ func (r *RepositoryImpl) FindAll(page int, pageSize int) ([]User, int, int, erro
 		results = append(results, user)
 	}
 
-	var totalCount int
-	queryPagination := fmt.Sprintf("select count(parent_table.id) from (%s) as parent_table", FindAllUser)
-	rowPagination, _ := r.db.Queryx(queryPagination, pageSize, offset)
-	rowPagination.Next()
-	err = rowPagination.Scan(&totalCount)
-
-	if err != nil {
-		return nil, 0, 0, err
-	}
-
-	var totalPage int = totalCount / pageSize
-	if totalCount%pageSize > 0 {
-		totalPage++
-	}
-
+	totalCount, totalPage, err := r.GetPagingDetails(FindAllUser, page, pageSize, nil)
 	return results, totalCount, totalPage, err
-}
-
-func (r *RepositoryImpl) FindAllPagination(page int, pageSize int) ([]User, int, int, error) {
-	return repository.FindAll[User](r.db, User{}, FindAllUser, nil, 1, 10)
 }
 
 func (r *RepositoryImpl) DeleteById(id int) error {
